@@ -23,7 +23,6 @@ class StoreTaskRequest extends FormRequest
     {
         return [
             'body' => 'required|string|max:255',
-            'user_id' => 'required|integer|exists:users,id',
         ];
     }
 }

@@ -5,17 +5,29 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Resources\TaskResource;
 use App\Models\Task;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class TaskController extends Controller
+class TaskController extends Controller implements HasMiddleware
 {
+    public static function middleware()
+    {
+        return [
+            new Middleware('auth:api', except: ['index', 'show']),
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $tasks = Task::getOrPaginate();
-        return response()->json($tasks);
+        //return response()->json($tasks);
+
+        return TaskResource::collection($tasks);
     }
 
     /**
@@ -23,13 +35,12 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request)
     {
-        /* $request->validate([
-            'body' => 'required|string|max:255',
-            'user_id' => 'required|integer|exists:users,id'
-        ]); */
+        $data = $request->all();
+        $data['user_id'] = auth('api')->id();
 
-        $task = Task::create($request->all());
-        return response()->json($task, 201);
+        $task = Task::create($data);
+        //return response()->json($task, 201);
+        return TaskResource::make($task);
     }
 
     /**
@@ -37,7 +48,7 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        return response()->json($task);
+        return TaskResource::make($task);
     }
 
     /**
@@ -51,7 +62,8 @@ class TaskController extends Controller
         ]); */
 
         $task->update($request->all());
-        return response()->json($task);
+        //return response()->json($task);
+        return TaskResource::make($task);
     }
 
     /**
