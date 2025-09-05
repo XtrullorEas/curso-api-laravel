@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
-use App\Models\Category;
 use App\Models\Post;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller implements HasMiddleware
@@ -56,6 +57,27 @@ class PostController extends Controller implements HasMiddleware
         return PostResource::make($post);
     }
 
+    public function tags(Request $request, Post $post)
+    {
+        Gate::authorize('author', $post);
+
+        $request->validate([
+            'tags' => 'required|array|min:1',
+        ]);
+
+        $tags = [];
+
+        foreach ($request->tags as $tag) {
+            $tags[] = Tag::firstOrCreate(['name' => $tag])->id;
+        }
+
+        $post->load('tags');
+
+        $post->tags()->sync($tags);
+
+        return PostResource::make($post);
+    }
+
     /**
      * Display the specified resource.
      */
@@ -69,6 +91,10 @@ class PostController extends Controller implements HasMiddleware
      */
     public function update(Request $request, Post $post)
     {
+        Gate::authorize('author', $post);
+
+        
+
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:posts,slug,' . $post->id,
@@ -97,8 +123,9 @@ class PostController extends Controller implements HasMiddleware
      */
     public function destroy(Post $post)
     {
-        $post->delete();
+        Gate::authorize('author', $post);
 
+        $post->delete();
         return response()->noContent();
     }
 }

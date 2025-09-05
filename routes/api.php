@@ -16,7 +16,10 @@ Route::post('auth/me', [\App\Http\Controllers\Api\AuthController::class, 'me']);
 Route::apiResource('users', UserController::class);
 Route::apiResource('tasks', TaskController::class);
 Route::apiResource('categories', CategoryController::class);
+
+Route::post('posts/{post}/tags', [PostController::class, 'tags']);
 Route::apiResource('posts', PostController::class);
+
 
 Route::get('prueba', function () {
     return auth('api')->user();
