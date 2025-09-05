@@ -17,6 +17,9 @@ Route::apiResource('users', UserController::class);
 Route::apiResource('tasks', TaskController::class);
 Route::apiResource('categories', CategoryController::class);
 
+Route::apiResource('permissions', \App\Http\Controllers\Api\PermissionController::class);
+Route::apiResource('roles', \App\Http\Controllers\Api\RoleController::class);
+
 Route::post('posts/{post}/tags', [PostController::class, 'tags']);
 Route::apiResource('posts', PostController::class);
 
